@@ -338,9 +338,135 @@
           </div>
         </section>
 
-        <section id="appsSubpanel" class="launcher-subpanel hidden">
-          <h2>Meus aplicativos</h2>
-          <p>Esta area visual sera ligada aos aplicativos instalados na proxima etapa.</p>
+        <section id="appsSubpanel" class="launcher-subpanel apps-page hidden">
+          <div class="launcher-title compact-title">
+            <h1>Meus Aplicativos</h1>
+            <p>Aqui voce podera adicionar/excluir seus aplicativos.</p>
+          </div>
+          <section class="launcher-credits mini-credits">
+            <h2>SEUS CREDITOS</h2>
+            <div class="credit-grid">
+              <span class="credit-pill"><b>&gt;</b> ANUAL: <em>0</em></span>
+              <span class="credit-pill"><b>#</b> Validade dos creditos: <em>21/06/2027 - 22:12</em></span>
+              <span class="credit-pill"><b>&gt;</b> 2 ANOS: <em>0</em></span>
+              <span class="credit-pill"><b>#</b> Limite de layouts: <em>19</em></span>
+              <span class="credit-pill"><b>A</b> Limite de aplicativos: <em id="appLimitPill">0</em></span>
+            </div>
+          </section>
+          <button id="startAutoApk" class="full-blue" type="button">ADD APK AUTOMATICO</button>
+          <button class="full-blue" type="button">ADD APK MANUAL</button>
+          <button class="full-blue" type="button">ADD PACOTE</button>
+          <div class="layout-actions app-actions">
+            <button id="showAppDisplayModal" type="button">EXIBIR</button>
+            <button id="showAppSearchModal" type="button">BUSCAR</button>
+          </div>
+          <section class="app-warning">
+            <strong>ATENCAO</strong>
+            <span>Apos adicionar algum aplicativo, NAO ESQUECA de ir em gerenciar launcher &gt; meus layouts na opcao de escolher aplicativos/links e adicionar o aplicativo ao layout que voce deseja!</span>
+            <span>O fato de voce ter anexado um aplicativo aqui, nao significa que ele vai estar no layout da launcher, para isso adicione ele ao LAYOUT!</span>
+          </section>
+          <h3 class="layout-label">MEUS APLICATIVOS:</h3>
+          <div id="appsList" class="app-list">
+            <button type="button" class="app-row" data-app-toggle="app-cleaner" data-app-name="limpar">
+              <span class="app-icon cleaner"><small>2024</small></span><strong>-* Limpar*</strong><i>v</i>
+            </button>
+            <div id="app-cleaner" class="app-detail hidden">
+              <button type="button"><span class="status-icon blue">T</span><strong><small>Pacote</small>com.xbs.clean</strong><em>&gt;</em></button>
+              <button type="button"><span class="status-icon gray">C</span><strong>Editar aplicativo</strong><em>&gt;</em></button>
+              <button type="button"><span class="status-icon purple">E</span><strong>Alterar nome do app</strong><em>&gt;</em></button>
+              <button type="button"><span class="status-icon red">L</span><strong>Excluir</strong><em>&gt;</em></button>
+              <button type="button"><span class="status-icon orange">o</span><strong>Desativar</strong><em>&gt;</em></button>
+              <h3>DADOS DO APLICATIVO:</h3>
+              <div class="app-status-bar">ATIVO</div>
+            </div>
+            <button type="button" class="app-row" data-app-name="airscreen"><span class="app-icon airscreen">AS</span><strong>- AIRSCREEN</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="watch"><span class="app-icon watch">WATCH</span><strong>- WATCH</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="xplus 7"><span class="app-icon xplus-app">X+</span><strong>- XPLUS 7.0</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="xplus in"><span class="app-icon xplus-in">in X</span><strong>- Xplus in</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="xplus"><span class="app-icon xplus-mini">X+</span><strong>- Xplus+</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="youtube"><span class="app-icon youtube">▶</span><strong>- YOUTUBE</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="link2sd"><span class="app-icon link2sd">L</span><strong>- LINK2SD</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="lpsm"><span class="app-icon lpsm">LPSM</span><strong>- LPSM</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="newpipe"><span class="app-icon newpipe">▶</span><strong>- NEWPIPE</strong><i>v</i></button>
+            <button type="button" class="app-row" data-app-name="ninety"><span class="app-icon ninety">N</span><strong>- NINETY P2P</strong><i>v</i></button>
+          </div>
+          <div class="pages-line">
+            <span>Paginas</span>
+            <strong>1/1</strong>
+          </div>
+        </section>
+
+        <section id="addAppPage" class="launcher-subpanel app-add-page hidden">
+          <div class="add-app-top">
+            <button id="appFlowBack" type="button">&lt;</button>
+            <strong>Adicionar aplicativo</strong>
+            <span></span>
+          </div>
+          <div class="flow-steps">
+            <span class="active" data-step-dot="1"><b>1</b>Arquivo APK</span>
+            <span data-step-dot="2"><b>2</b>Dados</span>
+            <span data-step-dot="3"><b>✓</b>Conclusao</span>
+          </div>
+
+          <div id="appStepOne" class="app-flow-step">
+            <section class="app-warning compact-warning">
+              <strong>ATENCAO</strong>
+              <span>Ao adicionar um novo arquivo, por favor aguardar ate 10 minutos nessa pagina, para que nosso sistema extraia todos dados deste aplicativo, como nome, icone, versao dentre outras informacoes.</span>
+            </section>
+            <input id="apkUploadInput" class="hidden" type="file" accept=".apk" />
+            <button id="apkDropButton" class="apk-drop" type="button">
+              <span id="apkDropIcon">☁</span>
+              <strong id="apkDropText">Clique para escolher o apk</strong>
+              <em id="apkFileName"></em>
+            </button>
+            <div id="uploadProgress" class="upload-progress hidden">
+              <p id="uploadPercentText">Enviando: 58% (2/4 partes)</p>
+              <div><span id="uploadBar" style="width:58%">58%</span></div>
+              <small id="uploadFileInfo">Arquivo: NewPipe_v0.28.8.apk</small>
+            </div>
+            <div id="processingChecklist" class="processing-list hidden">
+              <span>✓ Fazendo upload do arquivo</span>
+              <span>✓ Validando arquivo APK</span>
+              <span>✓ Analisando estrutura e extraindo dados</span>
+              <span>✓ Processando icone do aplicativo</span>
+            </div>
+            <button id="appFlowNextOne" class="full-blue flow-next" type="button">Prosseguir &gt;&gt;&gt;</button>
+          </div>
+
+          <div id="appStepTwo" class="app-flow-step hidden">
+            <div class="purple-note">No entanto voce podera modificar se quiser o nome que deseja exibir na launcher e o icone do aplicativo.</div>
+            <label class="flow-label">Nome do aplicativo<input id="flowAppName" type="text" value="NEWPIPE" /></label>
+            <p class="flow-text">Versao: <strong id="flowAppVersion">0.28.8</strong></p>
+            <p class="flow-text">Icone do app:</p>
+            <span class="app-icon newpipe big-icon">▶</span>
+            <p class="flow-text">OBS: Icone extraido do arquivo do aplicativo</p>
+            <label class="flow-label">Deseja usar este icone?
+              <select id="iconChoice">
+                <option value="yes">SIM</option>
+                <option value="manual">Adicionar manual</option>
+              </select>
+            </label>
+            <div id="manualIconBlock" class="manual-icon-block hidden">
+              <input id="manualIconInput" class="hidden" type="file" accept="image/png,image/jpeg,image/webp" />
+              <button id="manualIconButton" type="button">Escolher icone manual</button>
+              <span id="manualIconName">Nenhum icone escolhido</span>
+            </div>
+            <button id="appFlowNextTwo" class="full-blue flow-next" type="button">Prosseguir &gt;&gt;&gt;</button>
+          </div>
+
+          <div id="appStepThree" class="app-flow-step hidden">
+            <div class="confirm-app-data">
+              <h2>Verifique se as informacoes estao corretas!</h2>
+              <p>Nome do aplicativo: <strong id="confirmAppName">NEWPIPE</strong></p>
+              <p>Versao: <strong>0.28.8</strong></p>
+              <p>Icone do aplicativo:</p>
+              <span class="app-icon newpipe big-icon">▶</span>
+              <strong>ATENCAO! Tenha certeza de que estao corretas as informacoes!</strong>
+              <p>Os dados acima estao corretos ?</p>
+            </div>
+            <button id="confirmAddApp" class="confirm-yes" type="button">SIM</button>
+            <button id="cancelAddApp" class="confirm-no" type="button">NAO</button>
+          </div>
         </section>
       </section>
 
@@ -411,6 +537,31 @@
           <label>
             Layout
             <input id="deviceLayoutSearchInput" type="text" value="QUALQUER LAYOUT" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" data-close-modal>FECHAR</button>
+            <button type="submit">BUSCAR</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="appDisplayModal" class="modal-layer hidden">
+        <div class="simple-modal display-modal app-display-modal">
+          <h2>Modo de exibicao</h2>
+          <p>Escolha abaixo como deseja visualizar seus aplicativos.</p>
+          <button type="button" data-app-sort="new">Mais novos</button>
+          <button type="button" data-app-sort="old">Mais antigos</button>
+          <button type="button" data-app-sort="az">Ordem Alfabetica</button>
+          <button type="button" data-close-modal>FECHAR</button>
+        </div>
+      </div>
+
+      <div id="appSearchModal" class="modal-layer hidden">
+        <form class="simple-modal search-modal app-search-modal">
+          <h2>Busque pelo nome do aplicativo</h2>
+          <label>
+            Aplicativo
+            <input id="appSearchInput" type="text" placeholder="Nome do app" />
           </label>
           <div class="modal-actions">
             <button type="button" data-close-modal>FECHAR</button>

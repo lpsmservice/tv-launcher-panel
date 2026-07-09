@@ -32,6 +32,33 @@ const layoutSearchInput = document.querySelector('#layoutSearchInput');
 const deviceClientSearchInput = document.querySelector('#deviceClientSearchInput');
 const deviceCodeSearchInput = document.querySelector('#deviceCodeSearchInput');
 const deviceLayoutSearchInput = document.querySelector('#deviceLayoutSearchInput');
+const appDisplayModal = document.querySelector('#appDisplayModal');
+const appSearchModal = document.querySelector('#appSearchModal');
+const appSearchInput = document.querySelector('#appSearchInput');
+const appsSubpanel = document.querySelector('#appsSubpanel');
+const addAppPage = document.querySelector('#addAppPage');
+const apkUploadInput = document.querySelector('#apkUploadInput');
+const apkDropButton = document.querySelector('#apkDropButton');
+const apkDropIcon = document.querySelector('#apkDropIcon');
+const apkDropText = document.querySelector('#apkDropText');
+const apkFileName = document.querySelector('#apkFileName');
+const uploadProgress = document.querySelector('#uploadProgress');
+const uploadPercentText = document.querySelector('#uploadPercentText');
+const uploadBar = document.querySelector('#uploadBar');
+const uploadFileInfo = document.querySelector('#uploadFileInfo');
+const processingChecklist = document.querySelector('#processingChecklist');
+const appStepOne = document.querySelector('#appStepOne');
+const appStepTwo = document.querySelector('#appStepTwo');
+const appStepThree = document.querySelector('#appStepThree');
+const flowAppName = document.querySelector('#flowAppName');
+const confirmAppName = document.querySelector('#confirmAppName');
+const iconChoice = document.querySelector('#iconChoice');
+const manualIconBlock = document.querySelector('#manualIconBlock');
+const manualIconInput = document.querySelector('#manualIconInput');
+const manualIconButton = document.querySelector('#manualIconButton');
+const manualIconName = document.querySelector('#manualIconName');
+let appFlowStep = 1;
+let selectedApkName = 'NewPipe_v0.28.8.apk';
 
 passwordInput.value = password;
 userNameInput.value = localStorage.getItem('launcherUserName') || 'lpzovendas vacaria rs';
@@ -282,6 +309,11 @@ document.querySelector('#showDeviceSearchModal')?.addEventListener('click', () =
   openModal(deviceSearchModal);
   setTimeout(() => deviceClientSearchInput?.focus(), 50);
 });
+document.querySelector('#showAppDisplayModal')?.addEventListener('click', () => openModal(appDisplayModal));
+document.querySelector('#showAppSearchModal')?.addEventListener('click', () => {
+  openModal(appSearchModal);
+  setTimeout(() => appSearchInput?.focus(), 50);
+});
 
 document.querySelectorAll('[data-close-modal]').forEach((button) => {
   button.addEventListener('click', closeModals);
@@ -361,6 +393,151 @@ document.querySelector('.device-search-modal')?.addEventListener('submit', (even
     const matchesLayout = !layoutTerm || layoutTerm === 'qualquer layout' || text.includes(layoutTerm);
     item.style.display = matchesName && matchesCode && matchesLayout ? '' : 'none';
     if (detail && item.style.display === 'none') detail.classList.add('hidden');
+  });
+  closeModals();
+});
+
+function appRows() {
+  return Array.from(document.querySelectorAll('#appsList > .app-row'));
+}
+
+function setAppFlowStep(step) {
+  appFlowStep = step;
+  [appStepOne, appStepTwo, appStepThree].forEach((section, index) => {
+    section?.classList.toggle('hidden', index + 1 !== step);
+  });
+  document.querySelectorAll('[data-step-dot]').forEach((dot) => {
+    dot.classList.toggle('active', Number(dot.dataset.stepDot) === step);
+    dot.classList.toggle('done', Number(dot.dataset.stepDot) < step);
+  });
+  if (confirmAppName && flowAppName) confirmAppName.textContent = flowAppName.value || 'NEWPIPE';
+}
+
+function showAppsPage() {
+  document.querySelectorAll('.launcher-subpanel').forEach((item) => item.classList.add('hidden'));
+  appsSubpanel?.classList.remove('hidden');
+  appsSubpanel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showAddAppFlow() {
+  document.querySelectorAll('.launcher-subpanel').forEach((item) => item.classList.add('hidden'));
+  addAppPage?.classList.remove('hidden');
+  resetAppUploadVisual();
+  setAppFlowStep(1);
+  addAppPage?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetAppUploadVisual() {
+  selectedApkName = 'NewPipe_v0.28.8.apk';
+  if (apkDropIcon) apkDropIcon.textContent = '☁';
+  if (apkDropText) apkDropText.textContent = 'Clique para escolher o apk';
+  if (apkFileName) apkFileName.textContent = '';
+  uploadProgress?.classList.add('hidden');
+  processingChecklist?.classList.add('hidden');
+  if (uploadBar) {
+    uploadBar.style.width = '58%';
+    uploadBar.textContent = '58%';
+  }
+  if (uploadPercentText) uploadPercentText.textContent = 'Enviando: 58% (2/4 partes)';
+  if (uploadFileInfo) uploadFileInfo.textContent = `Arquivo: ${selectedApkName}`;
+}
+
+function showUploadProcessing() {
+  if (apkDropIcon) apkDropIcon.textContent = '✓';
+  if (apkDropText) apkDropText.textContent = selectedApkName;
+  if (apkFileName) apkFileName.textContent = selectedApkName;
+  if (uploadFileInfo) uploadFileInfo.textContent = `Arquivo: ${selectedApkName}`;
+  uploadProgress?.classList.remove('hidden');
+  setTimeout(() => {
+    if (uploadBar) {
+      uploadBar.style.width = '100%';
+      uploadBar.textContent = '100%';
+    }
+    if (uploadPercentText) uploadPercentText.textContent = 'Enviando: 100% (4/4 partes)';
+    processingChecklist?.classList.remove('hidden');
+  }, 350);
+  setTimeout(() => setAppFlowStep(2), 1050);
+}
+
+function ensureNewPipeVisible() {
+  const newpipe = document.querySelector('[data-app-name="newpipe"]');
+  if (newpipe) {
+    newpipe.classList.add('added-now');
+    setTimeout(() => newpipe.classList.remove('added-now'), 1400);
+  }
+}
+
+document.querySelector('#startAutoApk')?.addEventListener('click', showAddAppFlow);
+
+document.querySelector('#appFlowBack')?.addEventListener('click', () => {
+  if (appFlowStep > 1) {
+    setAppFlowStep(appFlowStep - 1);
+    return;
+  }
+  showAppsPage();
+});
+
+apkDropButton?.addEventListener('click', () => apkUploadInput?.click());
+apkUploadInput?.addEventListener('change', () => {
+  selectedApkName = apkUploadInput.files?.[0]?.name || 'NewPipe_v0.28.8.apk';
+  if (apkDropIcon) apkDropIcon.textContent = '✓';
+  if (apkDropText) apkDropText.textContent = selectedApkName;
+  if (apkFileName) apkFileName.textContent = selectedApkName;
+});
+
+document.querySelector('#appFlowNextOne')?.addEventListener('click', showUploadProcessing);
+document.querySelector('#appFlowNextTwo')?.addEventListener('click', () => setAppFlowStep(3));
+document.querySelector('#confirmAddApp')?.addEventListener('click', () => {
+  ensureNewPipeVisible();
+  showAppsPage();
+});
+document.querySelector('#cancelAddApp')?.addEventListener('click', () => setAppFlowStep(2));
+
+iconChoice?.addEventListener('change', () => {
+  manualIconBlock?.classList.toggle('hidden', iconChoice.value !== 'manual');
+});
+
+manualIconButton?.addEventListener('click', () => manualIconInput?.click());
+manualIconInput?.addEventListener('change', () => {
+  manualIconName.textContent = manualIconInput.files?.[0]?.name || 'Nenhum icone escolhido';
+});
+
+document.querySelectorAll('[data-app-toggle]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const detail = document.querySelector(`#${button.dataset.appToggle}`);
+    if (!detail) return;
+    detail.classList.toggle('hidden');
+    button.querySelector('i').textContent = detail.classList.contains('hidden') ? 'v' : '^';
+  });
+});
+
+document.querySelectorAll('[data-app-sort]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const list = document.querySelector('#appsList');
+    const rows = appRows();
+    if (button.dataset.appSort === 'az') rows.sort((a, b) => a.innerText.localeCompare(b.innerText));
+    if (button.dataset.appSort === 'new') rows.reverse();
+    if (button.dataset.appSort === 'old') rows.sort((a, b) => a.dataset.appName.localeCompare(b.dataset.appName));
+    rows.forEach((row) => {
+      const detail = row.nextElementSibling?.classList.contains('app-detail') ? row.nextElementSibling : null;
+      list.appendChild(row);
+      if (detail) list.appendChild(detail);
+    });
+    closeModals();
+  });
+});
+
+document.querySelector('.app-search-modal')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const term = (appSearchInput.value || '').trim().toLowerCase();
+  appRows().forEach((row) => {
+    const detail = row.nextElementSibling?.classList.contains('app-detail') ? row.nextElementSibling : null;
+    const match = !term || row.innerText.toLowerCase().includes(term);
+    row.style.display = match ? '' : 'none';
+    if (detail) {
+      detail.classList.add('hidden');
+      detail.style.display = match ? '' : 'none';
+    }
   });
   closeModals();
 });

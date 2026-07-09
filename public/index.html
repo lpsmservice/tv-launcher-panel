@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Painel Launcher TV</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <h1>Painel Launcher TV</h1>
+          <p>Ative aparelhos e troque imagens que aparecem no Android.</p>
+        </div>
+        <form id="loginForm" class="login">
+          <input id="password" type="password" placeholder="Senha do painel" autocomplete="current-password" />
+          <button>Entrar</button>
+        </form>
+      </section>
+
+      <section id="content" class="grid hidden">
+        <div class="panel">
+          <h2>Papel de parede</h2>
+          <img id="wallpaperPreview" class="preview" alt="" />
+          <form id="wallpaperForm" class="stack">
+            <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
+            <button>Enviar papel de parede</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>Novo banner</h2>
+          <form id="bannerForm" class="stack">
+            <input name="title" placeholder="Titulo do banner" required />
+            <input name="position" type="number" value="0" placeholder="Ordem" />
+            <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
+            <button>Enviar banner</button>
+          </form>
+        </div>
+
+        <div class="panel wide">
+          <h2>Dispositivos</h2>
+          <form id="activateForm" class="inline">
+            <input name="code" placeholder="Codigo de ativacao" required />
+            <input name="label" placeholder="Nome do aparelho" />
+            <button>Ativar</button>
+          </form>
+          <div id="devices" class="list"></div>
+        </div>
+
+        <div class="panel wide">
+          <h2>Banners</h2>
+          <div id="banners" class="cards"></div>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

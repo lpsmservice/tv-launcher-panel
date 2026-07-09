@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: tv-launcher-panel
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: trocar-essa-senha
+      - key: PUBLIC_BASE_URL
+        sync: false

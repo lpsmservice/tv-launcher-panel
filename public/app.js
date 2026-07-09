@@ -15,9 +15,12 @@ const bannersEl = document.querySelector('#banners');
 const clientsCount = document.querySelector('#clientsCount');
 const pendingCount = document.querySelector('#pendingCount');
 const welcomeName = document.querySelector('#welcomeName');
+const bannerCountPill = document.querySelector('#bannerCountPill');
+const launcherDarkToggle = document.querySelector('#launcherDarkToggle');
 
 passwordInput.value = password;
 userNameInput.value = localStorage.getItem('launcherUserName') || 'lpzovendas vacaria rs';
+appScreen.classList.toggle('launcher-dark', localStorage.getItem('launcherDark') !== 'false');
 
 function generateCaptcha() {
   const a = Math.floor(Math.random() * 8) + 1;
@@ -58,6 +61,7 @@ async function refresh() {
   const pendingDevices = data.devices.filter((item) => !item.active).length;
   clientsCount.innerHTML = `${data.devices.length || 0}<small>Clientes</small>`;
   pendingCount.innerHTML = `${pendingDevices}<small>Expirando</small>`;
+  if (bannerCountPill) bannerCountPill.textContent = data.banners.length || 0;
 
   devicesEl.innerHTML = data.devices.map((item) => `
     <div class="device-row">
@@ -104,10 +108,63 @@ document.querySelector('#newSum').addEventListener('click', generateCaptcha);
 
 document.querySelectorAll('.option-row').forEach((button) => {
   button.addEventListener('click', () => {
+    if (button.dataset.action === 'launcher') {
+      showLauncherPage();
+      return;
+    }
     const panel = document.querySelector(`#${button.dataset.panel}`);
+    if (panel) {
+      showDashboard();
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+function showLauncherPage() {
+  appScreen.classList.add('show-launcher-page');
+  document.querySelector('#launcherPage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showDashboard() {
+  appScreen.classList.remove('show-launcher-page');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('[data-action="home"]').forEach((item) => {
+  item.addEventListener('click', (event) => {
+    event.preventDefault();
+    showDashboard();
+  });
+});
+
+document.querySelectorAll('[data-action="launcher"]').forEach((item) => {
+  item.addEventListener('click', (event) => {
+    event.preventDefault();
+    showLauncherPage();
+  });
+});
+
+document.querySelectorAll('[data-action="top"]').forEach((item) => {
+  item.addEventListener('click', (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+document.querySelectorAll('.launcher-list button').forEach((button) => {
+  button.addEventListener('click', () => {
+    const panel = document.querySelector(`#${button.dataset.subpanel}`);
     if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+if (launcherDarkToggle) {
+  launcherDarkToggle.checked = localStorage.getItem('launcherDark') !== 'false';
+  launcherDarkToggle.addEventListener('change', () => {
+    appScreen.classList.toggle('launcher-dark', launcherDarkToggle.checked);
+    localStorage.setItem('launcherDark', launcherDarkToggle.checked ? 'true' : 'false');
+  });
+}
 
 document.querySelector('#wallpaperForm').addEventListener('submit', async (event) => {
   event.preventDefault();

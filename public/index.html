@@ -166,7 +166,7 @@
           <button data-subpanel="themesSubpanel"><span>Meus temas</span><em>5</em><i>&gt;</i></button>
         </nav>
 
-        <section id="bannersSubpanel" class="launcher-subpanel">
+        <section id="bannersSubpanel" class="launcher-subpanel hidden">
           <h2>Meus banners</h2>
           <form id="bannerForm" class="launcher-form">
             <input name="title" placeholder="Titulo do banner" required />
@@ -177,7 +177,7 @@
           <div id="banners" class="launcher-items"></div>
         </section>
 
-        <section id="wallpapersSubpanel" class="launcher-subpanel">
+        <section id="wallpapersSubpanel" class="launcher-subpanel hidden">
           <h2>Meus planos de fundo (imagens)</h2>
           <img id="wallpaperPreview" class="launcher-preview" alt="" />
           <form id="wallpaperForm" class="launcher-form">
@@ -186,7 +186,48 @@
           </form>
         </section>
 
-        <section id="appsSubpanel" class="launcher-subpanel">
+        <section id="layoutsSubpanel" class="launcher-subpanel layouts-page hidden">
+          <div class="launcher-title compact-title">
+            <h1>Meus Layouts</h1>
+            <p>Aqui voce podera gerenciar seus layouts existentes e/ou criar novos.</p>
+          </div>
+          <section class="launcher-credits mini-credits">
+            <h2>SEUS CREDITOS</h2>
+            <div class="credit-grid">
+              <span class="credit-pill"><b>&gt;</b> ANUAL: <em>0</em></span>
+              <span class="credit-pill"><b>#</b> Validade dos creditos: <em>21/06/2027 - 22:12</em></span>
+              <span class="credit-pill"><b>&gt;</b> 2 ANOS: <em>0</em></span>
+              <span class="credit-pill"><b>#</b> Limite de layouts: <em>19</em></span>
+              <span class="credit-pill"><b>A</b> Limite de aplicativos: <em>1</em></span>
+            </div>
+          </section>
+          <button class="full-blue" type="button">ADD LAYOUT</button>
+          <button class="full-blue" type="button">COPIAR LAYOUT</button>
+          <div class="layout-actions">
+            <button type="button">EXIBIR</button>
+            <button type="button">BUSCAR</button>
+          </div>
+          <h3 class="layout-label">LAYOUTS MEUS:</h3>
+          <div class="layout-list">
+            <button type="button"><span class="layout-thumb empty"></span><strong>all alugados espelho</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>livre/apps</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>LPSM alugados</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>Onix - 55</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>So para teste</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>teste001</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>teste8</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>vendido/VITALICIOS</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>vendido+mensal/limitado</strong><i>v</i></button>
+            <button type="button"><span class="layout-thumb empty"></span><strong>vendidos c/mensal</strong><i>v</i></button>
+            <button type="button" class="featured-layout"><span class="layout-thumb xplus">XPLUS</span><strong>Xplus in</strong><i>v</i></button>
+          </div>
+          <div class="pages-line">
+            <span>Paginas</span>
+            <strong>1/1</strong>
+          </div>
+        </section>
+
+        <section id="appsSubpanel" class="launcher-subpanel hidden">
           <h2>Meus aplicativos</h2>
           <p>Esta area visual sera ligada aos aplicativos instalados na proxima etapa.</p>
         </section>

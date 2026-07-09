@@ -154,7 +154,11 @@ document.querySelectorAll('[data-action="top"]').forEach((item) => {
 document.querySelectorAll('.launcher-list button').forEach((button) => {
   button.addEventListener('click', () => {
     const panel = document.querySelector(`#${button.dataset.subpanel}`);
-    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.launcher-subpanel').forEach((item) => item.classList.add('hidden'));
+    if (panel) {
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
 });
 

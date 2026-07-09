@@ -33,6 +33,47 @@
         <button class="icon-button" type="button" aria-label="Notificacoes">!</button>
       </header>
 
+      <aside id="sideDrawer" class="drawer-layer hidden">
+        <div class="drawer-panel">
+          <div class="drawer-profile">
+            <div class="drawer-avatar">image</div>
+            <div>
+              <strong id="drawerName">lpzovendas vacaria rs</strong>
+              <span>W 54997146384</span>
+            </div>
+            <button id="closeDrawer" type="button">x</button>
+          </div>
+
+          <nav class="drawer-list">
+            <button type="button" data-action="launcher"><span class="round-icon">#</span>Gerenciar launcher<i>&gt;</i></button>
+            <button type="button" data-panel="devicesPanel"><span class="round-icon">TV</span>Gerenciar clientes<i>&gt;</i></button>
+            <button type="button" data-panel="resellersPanel"><span class="round-icon">R</span>Gerenciar revendas<i>&gt;</i></button>
+            <button type="button" data-panel="noticePanel"><span class="round-icon">!</span>Notificacoes<i>&gt;</i></button>
+            <div class="drawer-theme"><span class="round-icon">M</span><strong>Tema escuro</strong><label class="switch"><input id="drawerDarkToggle" type="checkbox" checked /><span></span></label></div>
+          </nav>
+
+          <p class="drawer-section">Logs</p>
+          <nav class="drawer-list">
+            <button type="button" data-panel="logsPanel"><span class="round-icon muted-icon">L</span>Logs gerais<i>&gt;</i></button>
+            <button type="button"><span class="round-icon muted-icon">C</span>Creditos recebidos<i>&gt;</i></button>
+            <button type="button"><span class="round-icon muted-icon">R</span>Recargas feitas<i>&gt;</i></button>
+          </nav>
+
+          <p class="drawer-section">Configuracoes</p>
+          <nav class="drawer-list">
+            <button type="button" data-panel="settingsPanel"><span class="round-icon dark-icon">C</span>Configuracoes<i>&gt;</i></button>
+            <button id="logoutButton" type="button"><span class="round-icon dark-icon">S</span>Deslogar<i>&gt;</i></button>
+          </nav>
+
+          <nav class="drawer-bottom">
+            <button type="button">U</button>
+            <button type="button">L</button>
+            <button type="button">C</button>
+            <button id="drawerLogoutBottom" type="button">S</button>
+          </nav>
+        </div>
+      </aside>
+
       <section id="successBox" class="success hidden">
         <strong>OK</strong>
         <span>Aguarde que voce sera redirecionado.</span>
@@ -204,8 +245,8 @@
           <button class="full-blue" type="button">ADD LAYOUT</button>
           <button class="full-blue" type="button">COPIAR LAYOUT</button>
           <div class="layout-actions">
-            <button type="button">EXIBIR</button>
-            <button type="button">BUSCAR</button>
+            <button id="showDisplayModal" type="button">EXIBIR</button>
+            <button id="showSearchModal" type="button">BUSCAR</button>
           </div>
           <h3 class="layout-label">LAYOUTS MEUS:</h3>
           <div class="layout-list">
@@ -246,6 +287,31 @@
         <a href="#launcherPage" data-action="launcher">#</a>
         <a href="#appScreen" data-action="top">^</a>
       </nav>
+
+      <div id="displayModal" class="modal-layer hidden">
+        <div class="simple-modal display-modal">
+          <h2>Modo de exibicao</h2>
+          <p>Escolha abaixo como deseja visualizar seus layouts.</p>
+          <button type="button" data-sort="new">Mais novos</button>
+          <button type="button" data-sort="old">Mais antigos</button>
+          <button type="button" data-sort="az">Ordem Alfabetica</button>
+          <button type="button" data-close-modal>FECHAR</button>
+        </div>
+      </div>
+
+      <div id="searchModal" class="modal-layer hidden">
+        <form class="simple-modal search-modal">
+          <h2>Busque pelo nome do layout</h2>
+          <label>
+            Layout
+            <input id="layoutSearchInput" type="text" placeholder="Nome do layout" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" data-close-modal>FECHAR</button>
+            <button type="submit">BUSCAR</button>
+          </div>
+        </form>
+      </div>
     </main>
     <script src="/app.js"></script>
   </body>

@@ -17,10 +17,20 @@ const pendingCount = document.querySelector('#pendingCount');
 const welcomeName = document.querySelector('#welcomeName');
 const bannerCountPill = document.querySelector('#bannerCountPill');
 const launcherDarkToggle = document.querySelector('#launcherDarkToggle');
+const menuButton = document.querySelector('#menuButton');
+const sideDrawer = document.querySelector('#sideDrawer');
+const closeDrawer = document.querySelector('#closeDrawer');
+const drawerName = document.querySelector('#drawerName');
+const drawerDarkToggle = document.querySelector('#drawerDarkToggle');
+const logoutButton = document.querySelector('#logoutButton');
+const drawerLogoutBottom = document.querySelector('#drawerLogoutBottom');
+const displayModal = document.querySelector('#displayModal');
+const searchModal = document.querySelector('#searchModal');
+const layoutSearchInput = document.querySelector('#layoutSearchInput');
 
 passwordInput.value = password;
 userNameInput.value = localStorage.getItem('launcherUserName') || 'lpzovendas vacaria rs';
-appScreen.classList.toggle('launcher-dark', localStorage.getItem('launcherDark') !== 'false');
+setLauncherDark(localStorage.getItem('launcherDark') !== 'false');
 
 function generateCaptcha() {
   const a = Math.floor(Math.random() * 8) + 1;
@@ -47,6 +57,7 @@ function openApp() {
   loginScreen.classList.add('hidden');
   appScreen.classList.remove('hidden');
   successBox.classList.remove('hidden');
+  drawerName.textContent = userNameInput.value || 'lpzovendas vacaria rs';
   setTimeout(() => successBox.classList.add('hidden'), 1800);
 }
 
@@ -130,6 +141,61 @@ function showDashboard() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function openDrawer() {
+  if (!sideDrawer) return;
+  drawerName.textContent = userNameInput.value || 'lpzovendas vacaria rs';
+  sideDrawer.classList.remove('hidden');
+}
+
+function closeSideDrawer() {
+  if (sideDrawer) sideDrawer.classList.add('hidden');
+}
+
+function setLauncherDark(enabled) {
+  appScreen.classList.toggle('launcher-dark', enabled);
+  localStorage.setItem('launcherDark', enabled ? 'true' : 'false');
+  if (launcherDarkToggle) launcherDarkToggle.checked = enabled;
+  if (drawerDarkToggle) drawerDarkToggle.checked = enabled;
+}
+
+function logout() {
+  localStorage.removeItem('launcherAdminPassword');
+  password = '';
+  passwordInput.value = '';
+  appScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  closeSideDrawer();
+  generateCaptcha();
+}
+
+menuButton?.addEventListener('click', openDrawer);
+closeDrawer?.addEventListener('click', closeSideDrawer);
+sideDrawer?.addEventListener('click', (event) => {
+  if (event.target === sideDrawer) closeSideDrawer();
+});
+
+document.querySelectorAll('.drawer-list button').forEach((button) => {
+  button.addEventListener('click', () => {
+    closeSideDrawer();
+    if (button.dataset.action === 'launcher') {
+      showLauncherPage();
+      return;
+    }
+    const panel = document.querySelector(`#${button.dataset.panel}`);
+    if (panel) {
+      showDashboard();
+      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+    }
+  });
+});
+
+drawerDarkToggle?.addEventListener('change', () => {
+  setLauncherDark(drawerDarkToggle.checked);
+});
+
+logoutButton?.addEventListener('click', logout);
+drawerLogoutBottom?.addEventListener('click', logout);
+
 document.querySelectorAll('[data-action="home"]').forEach((item) => {
   item.addEventListener('click', (event) => {
     event.preventDefault();
@@ -163,12 +229,61 @@ document.querySelectorAll('.launcher-list button').forEach((button) => {
 });
 
 if (launcherDarkToggle) {
-  launcherDarkToggle.checked = localStorage.getItem('launcherDark') !== 'false';
   launcherDarkToggle.addEventListener('change', () => {
-    appScreen.classList.toggle('launcher-dark', launcherDarkToggle.checked);
-    localStorage.setItem('launcherDark', launcherDarkToggle.checked ? 'true' : 'false');
+    setLauncherDark(launcherDarkToggle.checked);
   });
 }
+
+function openModal(modal) {
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal-layer').forEach((modal) => modal.classList.add('hidden'));
+}
+
+document.querySelector('#showDisplayModal')?.addEventListener('click', () => openModal(displayModal));
+document.querySelector('#showSearchModal')?.addEventListener('click', () => {
+  openModal(searchModal);
+  setTimeout(() => layoutSearchInput?.focus(), 50);
+});
+
+document.querySelectorAll('[data-close-modal]').forEach((button) => {
+  button.addEventListener('click', closeModals);
+});
+
+document.querySelectorAll('.modal-layer').forEach((modal) => {
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeModals();
+  });
+});
+
+document.querySelectorAll('[data-sort]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const list = document.querySelector('.layout-list');
+    const items = Array.from(list.querySelectorAll('button'));
+    if (button.dataset.sort === 'az') {
+      items.sort((a, b) => a.innerText.localeCompare(b.innerText));
+    }
+    if (button.dataset.sort === 'new') {
+      items.reverse();
+    }
+    if (button.dataset.sort === 'old') {
+      items.sort((a, b) => a.innerText.localeCompare(b.innerText));
+    }
+    items.forEach((item) => list.appendChild(item));
+    closeModals();
+  });
+});
+
+document.querySelector('.search-modal')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const term = (layoutSearchInput.value || '').trim().toLowerCase();
+  document.querySelectorAll('.layout-list button').forEach((item) => {
+    item.style.display = !term || item.innerText.toLowerCase().includes(term) ? '' : 'none';
+  });
+  closeModals();
+});
 
 document.querySelector('#wallpaperForm').addEventListener('submit', async (event) => {
   event.preventDefault();

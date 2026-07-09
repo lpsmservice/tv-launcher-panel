@@ -3,57 +3,169 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Painel Launcher TV</title>
+    <title>LAUNCHER BOX</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="topbar">
-        <div>
-          <h1>Painel Launcher TV</h1>
-          <p>Ative aparelhos e troque imagens que aparecem no Android.</p>
+    <section id="loginScreen" class="login-screen">
+      <form id="loginForm" class="login-box">
+        <div class="login-mark">
+          <span>LOG IN</span>
+          <i></i>
         </div>
-        <form id="loginForm" class="login">
-          <input id="password" type="password" placeholder="Senha do painel" autocomplete="current-password" />
-          <button>Entrar</button>
+        <input id="userName" type="text" placeholder="Usuario" autocomplete="username" />
+        <div class="password-wrap">
+          <input id="password" type="password" placeholder="Senha" autocomplete="current-password" />
+          <button id="togglePassword" type="button" aria-label="Mostrar senha">O</button>
+        </div>
+        <p class="captcha-label">Resolva a soma matematica:</p>
+        <div id="captchaCard" class="captcha-card"></div>
+        <button id="newSum" class="small-button" type="button">Nova Soma</button>
+        <input id="captchaAnswer" class="captcha-answer" type="number" placeholder="Digite o resultado" />
+        <button class="login-submit">ENTRAR</button>
+      </form>
+    </section>
+
+    <main id="appScreen" class="app-screen hidden">
+      <header class="app-header">
+        <button id="menuButton" class="icon-button" type="button" aria-label="Menu">|||</button>
+        <strong>LAUNCHER BOX</strong>
+        <button class="icon-button" type="button" aria-label="Notificacoes">!</button>
+      </header>
+
+      <section id="successBox" class="success hidden">
+        <strong>OK</strong>
+        <span>Aguarde que voce sera redirecionado.</span>
+      </section>
+
+      <section class="hero">
+        <h1>Bem vindo(a) <span id="welcomeName">lpzovendas vacaria rs</span></h1>
+        <p>Gerencie seus clientes, aplicativos instalados, banners, temas, planos e muito mais.</p>
+      </section>
+
+      <section class="credits-card">
+        <h2>SEUS CREDITOS</h2>
+        <div class="credit-grid">
+          <span class="credit-pill"><b>&gt;</b> ANUAL: <em>0</em></span>
+          <span class="credit-pill"><b>#</b> Validade dos creditos: <em>21/06/2027 - 22:12</em></span>
+          <span class="credit-pill"><b>&gt;</b> 2 ANOS: <em>0</em></span>
+          <span class="credit-pill"><b>#</b> Limite de layouts: <em>19</em></span>
+          <span class="credit-pill"><b>A</b> Limite de aplicativos: <em>1</em></span>
+        </div>
+      </section>
+
+      <section class="section-title">OPCOES</section>
+      <nav class="option-list">
+        <button class="option-row" data-panel="launcherPanel"><span class="round-icon">#</span>Gerenciar launcher<i>&gt;</i></button>
+        <button class="option-row" data-panel="devicesPanel"><span class="round-icon">TV</span>Gerenciar dispositivos/clientes<i>&gt;</i></button>
+        <button class="option-row" data-panel="resellersPanel"><span class="round-icon">R</span>Gerenciar Revendas<i>&gt;</i></button>
+        <button class="option-row" data-panel="noticePanel"><span class="round-icon">!</span>Notificacoes<i>&gt;</i></button>
+        <button class="option-row" data-panel="logsPanel"><span class="round-icon">L</span>LOGs<i>&gt;</i></button>
+        <button class="option-row" data-panel="settingsPanel"><span class="round-icon">C</span>Configuracoes<i>&gt;</i></button>
+        <button class="option-row" data-panel="downloadPanel"><span class="round-icon">D</span>Baixar Launcher<i>v</i></button>
+        <button class="option-row" data-panel="passwordPanel"><span class="round-icon">K</span>Senha padrao<i>&gt;</i></button>
+        <button class="option-row" data-panel="tutorialPanel"><span class="round-icon">P</span>Videos tutoriais<i>&gt;</i></button>
+      </nav>
+
+      <section class="theme-card">
+        <h2>TEMA ESCURO</h2>
+        <label class="switch">
+          <input id="themeToggle" type="checkbox" checked />
+          <span></span>
+        </label>
+      </section>
+
+      <section class="data-block">
+        <p>Dados</p>
+        <div class="charts">
+          <div class="donut blue"><span id="clientsCount">0<small>Clientes</small></span></div>
+          <div class="donut red"><span id="pendingCount">0<small>Expirando</small></span></div>
+          <div class="donut white"><span>0<small>Revendas</small></span></div>
+        </div>
+      </section>
+
+      <section id="launcherPanel" class="work-panel">
+        <h2>Gerenciar launcher</h2>
+        <div class="panel-grid">
+          <article class="panel-card">
+            <h3>Papel de parede</h3>
+            <img id="wallpaperPreview" class="preview" alt="" />
+            <form id="wallpaperForm" class="stack">
+              <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
+              <button>Enviar papel de parede</button>
+            </form>
+          </article>
+          <article class="panel-card">
+            <h3>Novo banner</h3>
+            <form id="bannerForm" class="stack">
+              <input name="title" placeholder="Titulo do banner" required />
+              <input name="position" type="number" value="0" placeholder="Ordem" />
+              <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
+              <button>Enviar banner</button>
+            </form>
+          </article>
+        </div>
+        <div id="banners" class="banner-list"></div>
+      </section>
+
+      <section id="devicesPanel" class="work-panel">
+        <h2>Gerenciar dispositivos/clientes</h2>
+        <form id="activateForm" class="activate-form">
+          <input name="code" placeholder="Codigo de ativacao" required />
+          <input name="label" placeholder="Nome do aparelho" />
+          <button>Ativar</button>
         </form>
+        <div id="devices" class="device-list"></div>
       </section>
 
-      <section id="content" class="grid hidden">
-        <div class="panel">
-          <h2>Papel de parede</h2>
-          <img id="wallpaperPreview" class="preview" alt="" />
-          <form id="wallpaperForm" class="stack">
-            <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
-            <button>Enviar papel de parede</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <h2>Novo banner</h2>
-          <form id="bannerForm" class="stack">
-            <input name="title" placeholder="Titulo do banner" required />
-            <input name="position" type="number" value="0" placeholder="Ordem" />
-            <input name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
-            <button>Enviar banner</button>
-          </form>
-        </div>
-
-        <div class="panel wide">
-          <h2>Dispositivos</h2>
-          <form id="activateForm" class="inline">
-            <input name="code" placeholder="Codigo de ativacao" required />
-            <input name="label" placeholder="Nome do aparelho" />
-            <button>Ativar</button>
-          </form>
-          <div id="devices" class="list"></div>
-        </div>
-
-        <div class="panel wide">
-          <h2>Banners</h2>
-          <div id="banners" class="cards"></div>
-        </div>
+      <section id="noticePanel" class="work-panel compact">
+        <h2>Notificacoes</h2>
+        <p class="muted">Painel online conectado. Novas funcoes entram aqui na proxima etapa.</p>
       </section>
+
+      <section id="logsPanel" class="work-panel compact">
+        <h2>LOGs</h2>
+        <p class="muted">Eventos dos aparelhos ativados aparecem na lista de dispositivos.</p>
+      </section>
+
+      <section id="settingsPanel" class="work-panel compact">
+        <h2>Configuracoes</h2>
+        <p class="muted">Tema escuro, creditos e senha padrao serao refinados com os proximos prints.</p>
+      </section>
+
+      <section id="downloadPanel" class="work-panel compact">
+        <h2>Baixar Launcher</h2>
+        <p class="muted">Depois de finalizar o layout, eu gero o APK atualizado apontando para este painel.</p>
+      </section>
+
+      <section id="passwordPanel" class="work-panel compact">
+        <h2>Senha padrao</h2>
+        <p class="muted">Senha atual do painel: definida no Render em ADMIN_PASSWORD.</p>
+      </section>
+
+      <section id="tutorialPanel" class="work-panel compact">
+        <h2>Videos tutoriais</h2>
+        <p class="muted">Espaco reservado para seus links de tutorial.</p>
+      </section>
+
+      <section id="resellersPanel" class="work-panel compact">
+        <h2>Gerenciar Revendas</h2>
+        <p class="muted">Area visual criada. A logica de revendas pode entrar na segunda parte.</p>
+      </section>
+
+      <footer class="footer">
+        <strong>Copyright (c) Painel LAUNCHER BOX 2026. All Rights Reserved.</strong>
+        <span>LAUNCHER BOX foi feita pensando em voce.</span>
+        <a href="#">Termos de Uso</a>
+      </footer>
+
+      <nav class="bottom-nav">
+        <a href="#appScreen">H</a>
+        <a href="#devicesPanel">W</a>
+        <a href="#launcherPanel">B</a>
+        <a href="#launcherPanel">#</a>
+        <a href="#appScreen">^</a>
+      </nav>
     </main>
     <script src="/app.js"></script>
   </body>

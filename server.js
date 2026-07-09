@@ -6,7 +6,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import multer from 'multer';
-import Database from 'better-sqlite3';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -14,37 +13,29 @@ const port = process.env.PORT || 3000;
 const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 const dataDir = path.join(__dirname, 'data');
 const uploadDir = path.join(dataDir, 'uploads');
-const dbPath = path.join(dataDir, 'launcher.db');
+const storePath = path.join(dataDir, 'store.json');
 
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-db.exec(`
-  CREATE TABLE IF NOT EXISTS settings (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
-    wallpaper TEXT,
-    updated_at TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS banners (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    image TEXT NOT NULL,
-    position INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS devices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    device_id TEXT NOT NULL UNIQUE,
-    activation_code TEXT NOT NULL UNIQUE,
-    label TEXT,
-    active INTEGER NOT NULL DEFAULT 0,
-    last_seen TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
-  INSERT OR IGNORE INTO settings (id, wallpaper, updated_at)
-  VALUES (1, NULL, datetime('now'));
-`);
+function emptyStore() {
+  return {
+    settings: { wallpaper: null, updatedAt: new Date().toISOString() },
+    banners: [],
+    devices: []
+  };
+}
+
+function readStore() {
+  try {
+    return JSON.parse(fs.readFileSync(storePath, 'utf8'));
+  } catch {
+    return emptyStore();
+  }
+}
+
+function writeStore(store) {
+  fs.writeFileSync(storePath, JSON.stringify(store, null, 2));
+}
 
 app.use(cors());
 app.use(express.json());
@@ -84,102 +75,134 @@ function activationCode() {
   return crypto.randomInt(100000, 999999).toString();
 }
 
+function nextId(items) {
+  return items.reduce((max, item) => Math.max(max, item.id || 0), 0) + 1;
+}
+
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.post('/api/device/register', (req, res) => {
   const deviceId = String(req.body.deviceId || '').trim();
   if (!deviceId) return res.status(400).json({ error: 'deviceId obrigatorio' });
 
-  const existing = db.prepare('SELECT * FROM devices WHERE device_id = ?').get(deviceId);
-  if (existing) {
-    db.prepare('UPDATE devices SET last_seen = datetime("now") WHERE device_id = ?').run(deviceId);
-    return res.json({
-      active: Boolean(existing.active),
-      activationCode: existing.activation_code,
-      label: existing.label || null
-    });
+  const store = readStore();
+  let device = store.devices.find((item) => item.deviceId === deviceId);
+  if (!device) {
+    let code = activationCode();
+    while (store.devices.some((item) => item.activationCode === code)) code = activationCode();
+    device = {
+      id: nextId(store.devices),
+      deviceId,
+      activationCode: code,
+      label: null,
+      active: false,
+      lastSeen: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    store.devices.push(device);
   }
 
-  let code = activationCode();
-  while (db.prepare('SELECT id FROM devices WHERE activation_code = ?').get(code)) code = activationCode();
-  db.prepare(`
-    INSERT INTO devices (device_id, activation_code, active, last_seen, created_at)
-    VALUES (?, ?, 0, datetime('now'), datetime('now'))
-  `).run(deviceId, code);
-  res.json({ active: false, activationCode: code, label: null });
+  device.lastSeen = new Date().toISOString();
+  writeStore(store);
+  res.json({
+    active: Boolean(device.active),
+    activationCode: device.activationCode,
+    label: device.label || null
+  });
 });
 
 app.get('/api/launcher/config', (req, res) => {
   const deviceId = String(req.query.deviceId || '').trim();
-  const device = db.prepare('SELECT * FROM devices WHERE device_id = ?').get(deviceId);
+  const store = readStore();
+  const device = store.devices.find((item) => item.deviceId === deviceId);
   if (!device || !device.active) {
     return res.status(403).json({
       active: false,
-      activationCode: device?.activation_code || null
+      activationCode: device?.activationCode || null
     });
   }
 
-  db.prepare('UPDATE devices SET last_seen = datetime("now") WHERE device_id = ?').run(deviceId);
-  const settings = db.prepare('SELECT * FROM settings WHERE id = 1').get();
-  const banners = db.prepare('SELECT title, image FROM banners ORDER BY position ASC, id DESC').all();
+  device.lastSeen = new Date().toISOString();
+  writeStore(store);
   res.json({
     active: true,
-    wallpaper: assetUrl(req, settings.wallpaper),
-    banners: banners.map((item) => ({ title: item.title, image: assetUrl(req, item.image) }))
+    wallpaper: assetUrl(req, store.settings.wallpaper),
+    banners: store.banners
+      .slice()
+      .sort((a, b) => (a.position || 0) - (b.position || 0) || (b.id || 0) - (a.id || 0))
+      .map((item) => ({ title: item.title, image: assetUrl(req, item.image) }))
   });
 });
 
 app.get('/api/admin/overview', auth, (req, res) => {
-  const settings = db.prepare('SELECT * FROM settings WHERE id = 1').get();
-  const banners = db.prepare('SELECT * FROM banners ORDER BY position ASC, id DESC').all();
-  const devices = db.prepare('SELECT * FROM devices ORDER BY active ASC, last_seen DESC').all();
+  const store = readStore();
   res.json({
-    wallpaper: assetUrl(req, settings.wallpaper),
-    banners: banners.map((item) => ({ ...item, imageUrl: assetUrl(req, item.image) })),
-    devices: devices.map((item) => ({
-      id: item.id,
-      code: item.activation_code,
-      label: item.label,
-      active: Boolean(item.active),
-      lastSeen: item.last_seen,
-      createdAt: item.created_at
-    }))
+    wallpaper: assetUrl(req, store.settings.wallpaper),
+    banners: store.banners
+      .slice()
+      .sort((a, b) => (a.position || 0) - (b.position || 0) || (b.id || 0) - (a.id || 0))
+      .map((item) => ({ ...item, imageUrl: assetUrl(req, item.image) })),
+    devices: store.devices
+      .slice()
+      .sort((a, b) => Number(a.active) - Number(b.active) || String(b.lastSeen).localeCompare(String(a.lastSeen)))
+      .map((item) => ({
+        id: item.id,
+        code: item.activationCode,
+        label: item.label,
+        active: Boolean(item.active),
+        lastSeen: item.lastSeen,
+        createdAt: item.createdAt
+      }))
   });
 });
 
 app.post('/api/admin/wallpaper', auth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Imagem obrigatoria' });
-  db.prepare('UPDATE settings SET wallpaper = ?, updated_at = datetime("now") WHERE id = 1').run(req.file.filename);
+  const store = readStore();
+  store.settings.wallpaper = req.file.filename;
+  store.settings.updatedAt = new Date().toISOString();
+  writeStore(store);
   res.json({ ok: true, wallpaper: assetUrl(req, req.file.filename) });
 });
 
 app.post('/api/admin/banners', auth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Imagem obrigatoria' });
-  const title = String(req.body.title || 'Banner').trim();
-  const position = Number.parseInt(req.body.position || '0', 10) || 0;
-  db.prepare(`
-    INSERT INTO banners (title, image, position, created_at)
-    VALUES (?, ?, ?, datetime('now'))
-  `).run(title, req.file.filename, position);
+  const store = readStore();
+  store.banners.push({
+    id: nextId(store.banners),
+    title: String(req.body.title || 'Banner').trim(),
+    image: req.file.filename,
+    position: Number.parseInt(req.body.position || '0', 10) || 0,
+    createdAt: new Date().toISOString()
+  });
+  writeStore(store);
   res.json({ ok: true });
 });
 
 app.delete('/api/admin/banners/:id', auth, (req, res) => {
-  db.prepare('DELETE FROM banners WHERE id = ?').run(req.params.id);
+  const store = readStore();
+  store.banners = store.banners.filter((item) => String(item.id) !== String(req.params.id));
+  writeStore(store);
   res.json({ ok: true });
 });
 
 app.post('/api/admin/devices/activate', auth, (req, res) => {
   const code = String(req.body.code || '').trim();
   const label = String(req.body.label || '').trim() || null;
-  const result = db.prepare('UPDATE devices SET active = 1, label = COALESCE(?, label) WHERE activation_code = ?')
-    .run(label, code);
-  if (!result.changes) return res.status(404).json({ error: 'Codigo nao encontrado' });
+  const store = readStore();
+  const device = store.devices.find((item) => item.activationCode === code);
+  if (!device) return res.status(404).json({ error: 'Codigo nao encontrado' });
+  device.active = true;
+  if (label) device.label = label;
+  writeStore(store);
   res.json({ ok: true });
 });
 
 app.post('/api/admin/devices/:id/deactivate', auth, (req, res) => {
-  db.prepare('UPDATE devices SET active = 0 WHERE id = ?').run(req.params.id);
+  const store = readStore();
+  const device = store.devices.find((item) => String(item.id) === String(req.params.id));
+  if (device) device.active = false;
+  writeStore(store);
   res.json({ ok: true });
 });
 

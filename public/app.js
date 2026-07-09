@@ -1,4 +1,4 @@
-let password = localStorage.getItem('launcherAdminPassword') || '';
+﻿let password = localStorage.getItem('launcherAdminPassword') || '';
 let captchaTotal = 0;
 
 const loginScreen = document.querySelector('#loginScreen');
@@ -51,14 +51,20 @@ const appStepOne = document.querySelector('#appStepOne');
 const appStepTwo = document.querySelector('#appStepTwo');
 const appStepThree = document.querySelector('#appStepThree');
 const flowAppName = document.querySelector('#flowAppName');
+const flowAppVersion = document.querySelector('#flowAppVersion');
 const confirmAppName = document.querySelector('#confirmAppName');
 const iconChoice = document.querySelector('#iconChoice');
 const manualIconBlock = document.querySelector('#manualIconBlock');
 const manualIconInput = document.querySelector('#manualIconInput');
 const manualIconButton = document.querySelector('#manualIconButton');
 const manualIconName = document.querySelector('#manualIconName');
+const emptyAppsMessage = document.querySelector('#emptyAppsMessage');
 let appFlowStep = 1;
 let selectedApkName = 'NewPipe_v0.28.8.apk';
+let uploadedApkFile = null;
+let uploadedApps = [];
+
+const appCatalog = {};
 
 passwordInput.value = password;
 userNameInput.value = localStorage.getItem('launcherUserName') || 'lpzovendas vacaria rs';
@@ -105,6 +111,11 @@ async function refresh() {
   clientsCount.innerHTML = `${data.devices.length || 0}<small>Clientes</small>`;
   pendingCount.innerHTML = `${pendingDevices}<small>Expirando</small>`;
   if (bannerCountPill) bannerCountPill.textContent = data.banners.length || 0;
+  uploadedApps = data.apps || [];
+  renderUploadedApps(uploadedApps);
+  initializeAppDetails();
+  const appLimitPill = document.querySelector('#appLimitPill');
+  if (appLimitPill) appLimitPill.textContent = uploadedApps.length || 0;
 
   if (!devicesEl.dataset.static) {
     devicesEl.innerHTML = data.devices.map((item) => `
@@ -401,6 +412,103 @@ function appRows() {
   return Array.from(document.querySelectorAll('#appsList > .app-row'));
 }
 
+function safeId(value) {
+  return String(value || 'app').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'app';
+}
+
+function appMetaFromRow(row) {
+  const key = row.dataset.appName || safeId(row.innerText);
+  const catalog = appCatalog[key] || {};
+  const title = row.querySelector('strong')?.textContent?.replace(/^-+\s*/, '').trim() || 'APP';
+  return {
+    name: title,
+    packageName: row.dataset.package || catalog.packageName || `com.launcher.${safeId(title)}`,
+    version: row.dataset.version || catalog.version || '1.0.0',
+    apkUrl: row.dataset.apkUrl || '',
+    active: row.dataset.active !== 'false'
+  };
+}
+
+function createAppDetail(row) {
+  const meta = appMetaFromRow(row);
+  const id = row.dataset.appToggle || `app-detail-${safeId(row.dataset.appName || meta.name)}`;
+  row.dataset.appToggle = id;
+  const detail = document.createElement('div');
+  detail.id = id;
+  detail.className = 'app-detail hidden';
+  detail.innerHTML = `
+    <button type="button"><span class="status-icon blue">T</span><strong><small>Pacote</small>${meta.packageName}</strong><em>&gt;</em></button>
+    ${meta.apkUrl ? `<a class="app-download-row" href="${meta.apkUrl}" target="_blank" rel="noopener"><span class="status-icon blue">APK</span><strong><small>Download do APK</small>Arquivo valido para baixar na TV Box</strong><em>&gt;</em></a>` : ''}
+    <button type="button"><span class="status-icon gray">C</span><strong>Editar aplicativo</strong><em>&gt;</em></button>
+    <button type="button"><span class="status-icon purple">E</span><strong>Alterar nome do app</strong><em>&gt;</em></button>
+    <button type="button"><span class="status-icon red">L</span><strong>Excluir</strong><em>&gt;</em></button>
+    <button type="button"><span class="status-icon orange">o</span><strong>${meta.active ? 'Desativar' : 'Ativar'}</strong><em>&gt;</em></button>
+    <h3>DADOS DO APLICATIVO:</h3>
+    <div class="app-status-bar">${meta.active ? 'ATIVO' : 'DESATIVADO'}</div>
+    <div class="app-data-grid">
+      <div><strong>Nome</strong><span>${meta.name}</span></div>
+      <div><strong>Versao</strong><span>${meta.version}</span></div>
+      <div class="wide"><strong>APK</strong><span>${meta.apkUrl || 'Sem arquivo APK anexado'}</span></div>
+    </div>
+  `;
+  row.insertAdjacentElement('afterend', detail);
+  return detail;
+}
+
+function ensureAppDetail(row) {
+  const next = row.nextElementSibling;
+  if (next?.classList.contains('app-detail')) return next;
+  return createAppDetail(row);
+}
+
+function initializeAppDetails() {
+  appRows().forEach((row) => ensureAppDetail(row));
+}
+
+function renderUploadedApps(apps) {
+  const list = document.querySelector('#appsList');
+  if (!list) return;
+  list.querySelectorAll('[data-server-app-id]').forEach((row) => {
+    const detail = row.nextElementSibling;
+    if (detail?.classList.contains('app-detail')) detail.remove();
+    row.remove();
+  });
+  const realApps = Array.isArray(apps) ? apps : [];
+  emptyAppsMessage?.classList.toggle('hidden', realApps.length > 0);
+  realApps.forEach((item) => {
+    const key = `server-${item.id}`;
+    const displayName = `- ${String(item.name || 'APP').toUpperCase()}`;
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'app-row';
+    row.dataset.serverAppId = item.id;
+    row.dataset.appName = key;
+    row.innerHTML = `<span class="app-icon newpipe">APK</span><strong>${displayName}</strong><i>v</i>`;
+    list.appendChild(row);
+    row.dataset.package = item.packageName || `com.launcher.${safeId(item.name)}`;
+    row.dataset.version = item.version || '1.0.0';
+    row.dataset.apkUrl = item.apkUrl || '';
+    row.dataset.active = item.active === false ? 'false' : 'true';
+    ensureAppDetail(row);
+  });
+}
+
+function inferAppNameFromFile(fileName) {
+  const base = String(fileName || 'NewPipe_v0.28.8.apk').replace(/\.apk$/i, '');
+  if (/newpipe/i.test(base)) return 'NEWPIPE';
+  return base.replace(/[_-]+/g, ' ').trim().toUpperCase() || 'APP';
+}
+
+function packageFromAppName(name) {
+  if (/newpipe/i.test(name)) return 'org.schabi.newpipe';
+  return `com.launcher.${safeId(name).replace(/-/g, '.')}`;
+}
+
+function versionFromFile(fileName) {
+  const match = String(fileName || '').match(/v?(\d+(?:\.\d+){1,3})/i);
+  return match ? match[1] : '1.0.0';
+}
+
 function setAppFlowStep(step) {
   appFlowStep = step;
   [appStepOne, appStepTwo, appStepThree].forEach((section, index) => {
@@ -429,7 +537,9 @@ function showAddAppFlow() {
 
 function resetAppUploadVisual() {
   selectedApkName = 'NewPipe_v0.28.8.apk';
-  if (apkDropIcon) apkDropIcon.textContent = '☁';
+  uploadedApkFile = null;
+  if (apkUploadInput) apkUploadInput.value = '';
+  if (apkDropIcon) apkDropIcon.textContent = 'APK';
   if (apkDropText) apkDropText.textContent = 'Clique para escolher o apk';
   if (apkFileName) apkFileName.textContent = '';
   uploadProgress?.classList.add('hidden');
@@ -443,7 +553,7 @@ function resetAppUploadVisual() {
 }
 
 function showUploadProcessing() {
-  if (apkDropIcon) apkDropIcon.textContent = '✓';
+  if (apkDropIcon) apkDropIcon.textContent = 'OK';
   if (apkDropText) apkDropText.textContent = selectedApkName;
   if (apkFileName) apkFileName.textContent = selectedApkName;
   if (uploadFileInfo) uploadFileInfo.textContent = `Arquivo: ${selectedApkName}`;
@@ -459,12 +569,22 @@ function showUploadProcessing() {
   setTimeout(() => setAppFlowStep(2), 1050);
 }
 
-function ensureNewPipeVisible() {
-  const newpipe = document.querySelector('[data-app-name="newpipe"]');
-  if (newpipe) {
-    newpipe.classList.add('added-now');
-    setTimeout(() => newpipe.classList.remove('added-now'), 1400);
+async function saveUploadedApp() {
+  if (!uploadedApkFile) {
+    alert('Escolha um APK real primeiro.');
+    setAppFlowStep(1);
+    return;
   }
+  const name = flowAppName?.value?.trim() || inferAppNameFromFile(selectedApkName);
+  const body = new FormData();
+  body.append('apk', uploadedApkFile);
+  body.append('name', name);
+  body.append('packageName', packageFromAppName(name));
+  body.append('version', versionFromFile(selectedApkName));
+  body.append('icon', iconChoice?.value === 'manual' ? 'manual' : 'extracted');
+  await api('/api/admin/apps', { method: 'POST', body });
+  await refresh();
+  showAppsPage();
 }
 
 document.querySelector('#startAutoApk')?.addEventListener('click', showAddAppFlow);
@@ -479,17 +599,23 @@ document.querySelector('#appFlowBack')?.addEventListener('click', () => {
 
 apkDropButton?.addEventListener('click', () => apkUploadInput?.click());
 apkUploadInput?.addEventListener('change', () => {
-  selectedApkName = apkUploadInput.files?.[0]?.name || 'NewPipe_v0.28.8.apk';
-  if (apkDropIcon) apkDropIcon.textContent = '✓';
+  uploadedApkFile = apkUploadInput.files?.[0] || null;
+  selectedApkName = uploadedApkFile?.name || 'NewPipe_v0.28.8.apk';
+  if (flowAppName) flowAppName.value = inferAppNameFromFile(selectedApkName);
+  if (flowAppVersion) flowAppVersion.textContent = versionFromFile(selectedApkName);
+  if (apkDropIcon) apkDropIcon.textContent = 'OK';
   if (apkDropText) apkDropText.textContent = selectedApkName;
   if (apkFileName) apkFileName.textContent = selectedApkName;
 });
 
 document.querySelector('#appFlowNextOne')?.addEventListener('click', showUploadProcessing);
 document.querySelector('#appFlowNextTwo')?.addEventListener('click', () => setAppFlowStep(3));
-document.querySelector('#confirmAddApp')?.addEventListener('click', () => {
-  ensureNewPipeVisible();
-  showAppsPage();
+document.querySelector('#confirmAddApp')?.addEventListener('click', async () => {
+  try {
+    await saveUploadedApp();
+  } catch (error) {
+    alert(error.message);
+  }
 });
 document.querySelector('#cancelAddApp')?.addEventListener('click', () => setAppFlowStep(2));
 
@@ -502,13 +628,12 @@ manualIconInput?.addEventListener('change', () => {
   manualIconName.textContent = manualIconInput.files?.[0]?.name || 'Nenhum icone escolhido';
 });
 
-document.querySelectorAll('[data-app-toggle]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const detail = document.querySelector(`#${button.dataset.appToggle}`);
-    if (!detail) return;
-    detail.classList.toggle('hidden');
-    button.querySelector('i').textContent = detail.classList.contains('hidden') ? 'v' : '^';
-  });
+document.querySelector('#appsList')?.addEventListener('click', (event) => {
+  const button = event.target.closest('.app-row');
+  if (!button) return;
+  const detail = ensureAppDetail(button);
+  detail.classList.toggle('hidden');
+  button.querySelector('i').textContent = detail.classList.contains('hidden') ? 'v' : '^';
 });
 
 document.querySelectorAll('[data-app-sort]').forEach((button) => {
@@ -581,5 +706,6 @@ document.addEventListener('click', async (event) => {
   }
 });
 
+initializeAppDetails();
 generateCaptcha();
 if (password) refresh().catch(() => appScreen.classList.add('hidden'));

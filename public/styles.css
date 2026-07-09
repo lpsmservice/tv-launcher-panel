@@ -1032,6 +1032,13 @@ input {
   margin: 0 -20px;
   border-top: 1px solid #1a2d45;
 }
+.empty-apps-message {
+  margin: 0;
+  padding: 28px 20px;
+  border-bottom: 1px solid #1a2d45;
+  background: #0d1b2e;
+  color: #aebed3;
+}
 .app-row {
   width: 100%;
   min-height: 106px;
@@ -1134,7 +1141,8 @@ input {
   border-bottom: 1px solid #1a2d45;
   background: #0d1b2e;
 }
-.app-detail > button {
+.app-detail > button,
+.app-download-row {
   width: 100%;
   min-height: 72px;
   display: grid;
@@ -1148,6 +1156,9 @@ input {
   padding: 0 20px 0 0;
   text-align: left;
   font-size: 19px;
+}
+.app-download-row {
+  text-decoration: none;
 }
 .app-detail strong {
   display: block;
@@ -1179,6 +1190,35 @@ input {
   text-align: center;
   font-size: 22px;
   font-weight: 800;
+}
+.app-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 20px 24px -64px;
+}
+.app-data-grid div {
+  display: grid;
+  grid-template-rows: 42px auto;
+  border: 1px solid #1f3550;
+  background: #102137;
+  text-align: center;
+}
+.app-data-grid .wide {
+  grid-column: 1 / -1;
+}
+.app-data-grid strong,
+.app-data-grid span {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #1f3550;
+  overflow-wrap: anywhere;
+}
+.app-data-grid span {
+  border-bottom: 0;
+  color: #aebed3;
+  font-size: 13px;
 }
 .app-display-modal,
 .app-search-modal {

@@ -26,7 +26,12 @@ const logoutButton = document.querySelector('#logoutButton');
 const drawerLogoutBottom = document.querySelector('#drawerLogoutBottom');
 const displayModal = document.querySelector('#displayModal');
 const searchModal = document.querySelector('#searchModal');
+const deviceDisplayModal = document.querySelector('#deviceDisplayModal');
+const deviceSearchModal = document.querySelector('#deviceSearchModal');
 const layoutSearchInput = document.querySelector('#layoutSearchInput');
+const deviceClientSearchInput = document.querySelector('#deviceClientSearchInput');
+const deviceCodeSearchInput = document.querySelector('#deviceCodeSearchInput');
+const deviceLayoutSearchInput = document.querySelector('#deviceLayoutSearchInput');
 
 passwordInput.value = password;
 userNameInput.value = localStorage.getItem('launcherUserName') || 'lpzovendas vacaria rs';
@@ -74,14 +79,16 @@ async function refresh() {
   pendingCount.innerHTML = `${pendingDevices}<small>Expirando</small>`;
   if (bannerCountPill) bannerCountPill.textContent = data.banners.length || 0;
 
-  devicesEl.innerHTML = data.devices.map((item) => `
-    <div class="device-row">
-      <strong>${item.code}</strong>
-      <span>${item.label || 'Sem nome'}</span>
-      <span class="badge ${item.active ? 'active' : ''}">${item.active ? 'Ativo' : 'Aguardando'}</span>
-      <button data-deactivate="${item.id}" class="danger">Desativar</button>
-    </div>
-  `).join('') || '<p class="muted">Nenhum aparelho abriu o launcher ainda.</p>';
+  if (!devicesEl.dataset.static) {
+    devicesEl.innerHTML = data.devices.map((item) => `
+      <div class="device-row">
+        <strong>${item.code}</strong>
+        <span>${item.label || 'Sem nome'}</span>
+        <span class="badge ${item.active ? 'active' : ''}">${item.active ? 'Ativo' : 'Aguardando'}</span>
+        <button data-deactivate="${item.id}" class="danger">Desativar</button>
+      </div>
+    `).join('') || '<p class="muted">Nenhum aparelho abriu o launcher ainda.</p>';
+  }
 
   bannersEl.innerHTML = data.banners.map((item) => `
     <article class="banner-row">
@@ -123,6 +130,10 @@ document.querySelectorAll('.option-row').forEach((button) => {
       showLauncherPage();
       return;
     }
+    if (button.dataset.action === 'devices') {
+      showDevicesPage();
+      return;
+    }
     const panel = document.querySelector(`#${button.dataset.panel}`);
     if (panel) {
       showDashboard();
@@ -132,12 +143,20 @@ document.querySelectorAll('.option-row').forEach((button) => {
 });
 
 function showLauncherPage() {
+  appScreen.classList.remove('show-devices-page');
   appScreen.classList.add('show-launcher-page');
   document.querySelector('#launcherPage').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function showDevicesPage() {
+  appScreen.classList.remove('show-launcher-page');
+  appScreen.classList.add('show-devices-page');
+  document.querySelector('#devicesPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function showDashboard() {
   appScreen.classList.remove('show-launcher-page');
+  appScreen.classList.remove('show-devices-page');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -181,6 +200,10 @@ document.querySelectorAll('.drawer-list button').forEach((button) => {
       showLauncherPage();
       return;
     }
+    if (button.dataset.action === 'devices') {
+      showDevicesPage();
+      return;
+    }
     const panel = document.querySelector(`#${button.dataset.panel}`);
     if (panel) {
       showDashboard();
@@ -207,6 +230,13 @@ document.querySelectorAll('[data-action="launcher"]').forEach((item) => {
   item.addEventListener('click', (event) => {
     event.preventDefault();
     showLauncherPage();
+  });
+});
+
+document.querySelectorAll('[data-action="devices"]').forEach((item) => {
+  item.addEventListener('click', (event) => {
+    event.preventDefault();
+    showDevicesPage();
   });
 });
 
@@ -247,6 +277,11 @@ document.querySelector('#showSearchModal')?.addEventListener('click', () => {
   openModal(searchModal);
   setTimeout(() => layoutSearchInput?.focus(), 50);
 });
+document.querySelector('#showDeviceDisplayModal')?.addEventListener('click', () => openModal(deviceDisplayModal));
+document.querySelector('#showDeviceSearchModal')?.addEventListener('click', () => {
+  openModal(deviceSearchModal);
+  setTimeout(() => deviceClientSearchInput?.focus(), 50);
+});
 
 document.querySelectorAll('[data-close-modal]').forEach((button) => {
   button.addEventListener('click', closeModals);
@@ -281,6 +316,51 @@ document.querySelector('.search-modal')?.addEventListener('submit', (event) => {
   const term = (layoutSearchInput.value || '').trim().toLowerCase();
   document.querySelectorAll('.layout-list button').forEach((item) => {
     item.style.display = !term || item.innerText.toLowerCase().includes(term) ? '' : 'none';
+  });
+  closeModals();
+});
+
+document.querySelectorAll('[data-client-toggle]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const detail = document.querySelector(`#${button.dataset.clientToggle}`);
+    if (!detail) return;
+    detail.classList.toggle('hidden');
+    button.classList.toggle('expanded', !detail.classList.contains('hidden'));
+    button.querySelector('em').textContent = detail.classList.contains('hidden') ? 'v' : '^';
+  });
+});
+
+document.querySelectorAll('[data-device-sort]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const list = document.querySelector('.client-list');
+    const items = Array.from(list.querySelectorAll('.client-row'));
+    if (button.dataset.deviceSort === 'az') {
+      items.sort((a, b) => a.innerText.localeCompare(b.innerText));
+    } else if (button.dataset.deviceSort === 'old') {
+      items.reverse();
+    } else if (button.dataset.deviceSort === 'valid-long') {
+      items.sort((a, b) => b.innerText.localeCompare(a.innerText));
+    } else {
+      items.sort((a, b) => a.innerText.localeCompare(b.innerText));
+    }
+    items.forEach((item) => list.appendChild(item));
+    closeModals();
+  });
+});
+
+document.querySelector('.device-search-modal')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const nameTerm = (deviceClientSearchInput.value || '').trim().toLowerCase();
+  const codeTerm = (deviceCodeSearchInput.value || '').trim().toLowerCase();
+  const layoutTerm = (deviceLayoutSearchInput.value || '').trim().toLowerCase();
+  document.querySelectorAll('.client-row').forEach((item) => {
+    const detail = document.querySelector(`#${item.dataset.clientToggle}`);
+    const text = `${item.innerText} ${detail?.innerText || ''}`.toLowerCase();
+    const matchesName = !nameTerm || text.includes(nameTerm);
+    const matchesCode = !codeTerm || text.includes(codeTerm);
+    const matchesLayout = !layoutTerm || layoutTerm === 'qualquer layout' || text.includes(layoutTerm);
+    item.style.display = matchesName && matchesCode && matchesLayout ? '' : 'none';
+    if (detail && item.style.display === 'none') detail.classList.add('hidden');
   });
   closeModals();
 });

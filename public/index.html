@@ -46,7 +46,7 @@
 
           <nav class="drawer-list">
             <button type="button" data-action="launcher"><span class="round-icon">#</span>Gerenciar launcher<i>&gt;</i></button>
-            <button type="button" data-panel="devicesPanel"><span class="round-icon">TV</span>Gerenciar clientes<i>&gt;</i></button>
+            <button type="button" data-action="devices"><span class="round-icon">TV</span>Gerenciar clientes<i>&gt;</i></button>
             <button type="button" data-panel="resellersPanel"><span class="round-icon">R</span>Gerenciar revendas<i>&gt;</i></button>
             <button type="button" data-panel="noticePanel"><span class="round-icon">!</span>Notificacoes<i>&gt;</i></button>
             <div class="drawer-theme"><span class="round-icon">M</span><strong>Tema escuro</strong><label class="switch"><input id="drawerDarkToggle" type="checkbox" checked /><span></span></label></div>
@@ -98,7 +98,7 @@
       <section class="section-title">OPCOES</section>
       <nav class="option-list">
         <button class="option-row" data-action="launcher"><span class="round-icon">#</span>Gerenciar launcher<i>&gt;</i></button>
-        <button class="option-row" data-panel="devicesPanel"><span class="round-icon">TV</span>Gerenciar dispositivos/clientes<i>&gt;</i></button>
+        <button class="option-row" data-action="devices"><span class="round-icon">TV</span>Gerenciar dispositivos/clientes<i>&gt;</i></button>
         <button class="option-row" data-panel="resellersPanel"><span class="round-icon">R</span>Gerenciar Revendas<i>&gt;</i></button>
         <button class="option-row" data-panel="noticePanel"><span class="round-icon">!</span>Notificacoes<i>&gt;</i></button>
         <button class="option-row" data-panel="logsPanel"><span class="round-icon">L</span>LOGs<i>&gt;</i></button>
@@ -125,14 +125,84 @@
         </div>
       </section>
 
-      <section id="devicesPanel" class="work-panel">
-        <h2>Gerenciar dispositivos/clientes</h2>
-        <form id="activateForm" class="activate-form">
+      <section id="devicesPanel" class="devices-page hidden">
+        <div class="launcher-title">
+          <h1>Gerenciar dispositivos/clientes</h1>
+          <p>Aqui voce podera ver os dispositivos que estao usando a launcher e administrar seus clientes.</p>
+        </div>
+
+        <section class="launcher-credits mini-credits">
+          <h2>SEUS CREDITOS</h2>
+          <div class="credit-grid">
+            <span class="credit-pill"><b>&gt;</b> ANUAL: <em>0</em></span>
+            <span class="credit-pill"><b>#</b> Validade dos creditos: <em>21/06/2027 - 22:12</em></span>
+            <span class="credit-pill"><b>&gt;</b> 2 ANOS: <em>0</em></span>
+            <span class="credit-pill"><b>#</b> Limite de layouts: <em>19</em></span>
+            <span class="credit-pill"><b>A</b> Limite de aplicativos: <em>1</em></span>
+          </div>
+        </section>
+
+        <button class="full-blue" type="button">Renovar em Massa</button>
+        <div class="layout-actions client-actions">
+          <button id="showDeviceDisplayModal" type="button">EXIBIR</button>
+          <button id="showDeviceSearchModal" type="button">BUSCAR</button>
+        </div>
+
+        <button class="legend-row" type="button"><span>?</span>Legenda<i>v</i></button>
+        <h3 class="layout-label">DISPOSITIVOS:</h3>
+        <form id="activateForm" class="activate-form hidden">
           <input name="code" placeholder="Codigo de ativacao" required />
           <input name="label" placeholder="Nome do aparelho" />
           <button>Ativar</button>
         </form>
-        <div id="devices" class="device-list"></div>
+        <div id="devices" class="client-list" data-static="true">
+          <button type="button" class="client-row" data-client-toggle="cliente-amigo"><span class="status-icon red">o</span><strong><i class="client-dot red-dot"></i>Amigo</strong><em>v</em></button>
+          <button type="button" class="client-row" data-client-toggle="cliente-suelen"><span class="status-icon red">x</span><strong><i class="client-dot green-dot"></i>Suelen/nalva</strong><em>v</em></button>
+          <div id="cliente-suelen" class="client-detail hidden">
+            <button type="button"><span class="status-icon blue">ID</span><strong><small>Codigo do dispositivo</small>66102EWF1X</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon gray">C</span><strong>Editar dispositivo/cliente</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon dark">D</span><strong><small>Alterar vencimento do cliente</small>03/07/2026 - 23:59:59</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon purple">E</span><strong>Alterar nome do cliente</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon orange-outline">L</span><strong><small>Layout utilizado</small>vendidos c/mensal</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon orange">o</span><strong>Bloquear</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon blue">T</span><strong>Desabilitar cache temporario</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon dark">R</span><strong>Ver LOGs</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon orange">!</span><strong>Enviar notificacao para cliente</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon blue">#</span><strong>Trocar dispositivo</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon gray">/</span><strong>Anotacoes</strong><em>&gt;</em></button>
+            <button type="button"><span class="status-icon dark">P</span><strong><small>Versao da launcher</small>7.0</strong><em>&gt;</em></button>
+            <h3>DADOS DO DISPOSITIVO:</h3>
+            <div class="expired-bar">EXPIRADA!</div>
+            <div class="device-data-grid">
+              <div><strong>Cadastro</strong><span>01/09/2025 - 18:07:28</span></div>
+              <div><strong>Ativacao</strong><span>01/09/2025 - 18:08:47</span></div>
+              <div><strong>Vencimento*</strong><span>03/07/2026 - 23:59:59</span></div>
+              <div><strong>Launcher**</strong><span>02/09/2026 - 08:40:23</span></div>
+              <div><strong>Bloquear apps apos vencer?</strong><span>NAO</span></div>
+              <div><strong>Bloquear wifi com senha?</strong><span>NAO</span></div>
+              <div><strong>Acesso a data e hora?</strong><span>SIM</span></div>
+              <div><strong>Acesso ao Bluetooth?</strong><span>SIM</span></div>
+              <div class="wide"><strong>Ultima vez que usou</strong><span>07/07/2026 - 20:49:08</span></div>
+            </div>
+            <p class="device-help">CADASTRO: Data na qual o dispositivo foi cadastrado no sistema.<br>ATIVACAO: Data na qual foi ativado um periodo de teste para o dispositivo e/ou nos casos em que o dispositivo foi trocado por id de outro, a data da ultima troca.<br>VENCIMENTO: E a data que voce informou que o plano do cliente ira expirar, esta data voce podera alterar sempre que necessitar.</p>
+          </div>
+          <button type="button" class="client-row" data-client-toggle="cliente-suelen2"><span class="status-icon red">x</span><strong><i class="client-dot green-dot"></i>Suelen 2</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon red">x</span><strong><i class="client-dot red-dot"></i>Ermenio pro</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon red">x</span><strong><i class="client-dot red-dot"></i>Pablo novo mxq</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon red">o</span><strong><i class="client-dot red-dot"></i>Disponivel mxq/manna</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon red">o</span><strong><i class="client-dot red-dot"></i>Jose esquina sushi</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon orange">!</span><strong><i class="client-dot green-dot"></i>Disponivel lpsm (mannatech)</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon orange">!</span><strong><i class="client-dot green-dot"></i>Denner Onix</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon green">+</span><strong><i class="client-dot green-dot"></i>Daniela/joao luiz</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon green">+</span><strong><i class="client-dot green-dot"></i>Bruno mannatech</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon green">+</span><strong><i class="client-dot green-dot"></i>Mariele joy verde</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon green">+</span><strong><i class="client-dot green-dot"></i>Aniciele atualizado lpsm</strong><em>v</em></button>
+          <button type="button" class="client-row"><span class="status-icon green">+</span><strong><i class="client-dot green-dot"></i>pamela</strong><em>v</em></button>
+        </div>
+        <div class="pages-line client-pages">
+          <span>Paginas</span>
+          <strong><button type="button">Proxima&gt;</button>1/3</strong>
+        </div>
       </section>
 
       <section id="noticePanel" class="work-panel compact">
@@ -282,7 +352,7 @@
 
       <nav class="bottom-nav">
         <a href="#appScreen" data-action="home">H</a>
-        <a href="#devicesPanel">W</a>
+        <a href="#devicesPanel" data-action="devices">W</a>
         <a href="#launcherPage" data-action="launcher">B</a>
         <a href="#launcherPage" data-action="launcher">#</a>
         <a href="#appScreen" data-action="top">^</a>
@@ -305,6 +375,42 @@
           <label>
             Layout
             <input id="layoutSearchInput" type="text" placeholder="Nome do layout" />
+          </label>
+          <div class="modal-actions">
+            <button type="button" data-close-modal>FECHAR</button>
+            <button type="submit">BUSCAR</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="deviceDisplayModal" class="modal-layer hidden">
+        <div class="simple-modal display-modal device-display-modal">
+          <h2>Modo de exibicao</h2>
+          <p>Escolha abaixo como deseja visualizar seus dispositivos.</p>
+          <button type="button" data-device-sort="valid-long">Validade longe de expirar</button>
+          <button type="button" data-device-sort="valid-soon">Validade proxima de expirar</button>
+          <button type="button" data-device-sort="new">Mais novos</button>
+          <button type="button" data-device-sort="old">Mais antigos</button>
+          <button type="button" data-device-sort="az">Ordem alfabetica</button>
+          <button type="button" data-device-sort="launcher-soon">Launcher proxima de expirar</button>
+          <button type="button" data-device-sort="unused">Clientes a mais tempo sem usar</button>
+        </div>
+      </div>
+
+      <div id="deviceSearchModal" class="modal-layer hidden">
+        <form class="simple-modal search-modal device-search-modal">
+          <h2>Busque pelo nome de seu cliente ou pelo codigo do dispositivo. Voce podera filtrar tambem clientes que usam um layout especifico.</h2>
+          <label>
+            Cliente
+            <input id="deviceClientSearchInput" type="text" placeholder="Nome do cliente" />
+          </label>
+          <label>
+            Codigo
+            <input id="deviceCodeSearchInput" type="text" placeholder="Codigo do dispositivo" />
+          </label>
+          <label>
+            Layout
+            <input id="deviceLayoutSearchInput" type="text" value="QUALQUER LAYOUT" />
           </label>
           <div class="modal-actions">
             <button type="button" data-close-modal>FECHAR</button>

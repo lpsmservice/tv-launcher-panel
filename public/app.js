@@ -86,8 +86,17 @@ async function api(path, options = {}) {
       'x-admin-password': password
     }
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || 'Erro no painel');
+  const raw = await response.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = {};
+  }
+  if (!response.ok) {
+    const message = data.error || data.message || raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    throw new Error(message || 'Erro no painel');
+  }
   return data;
 }
 
